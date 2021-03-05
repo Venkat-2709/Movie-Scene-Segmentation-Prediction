@@ -4,7 +4,20 @@
 
 ### To execute the code
 
-Download the repo and copy the data file into the project directory and name the folder as 'data'.                                               
+Download the repo and copy the data file into the project directory and name the folder as 'data'.  
+
+### Project Structure
+
+```bash
+    |--data
+    |    |--all the data file (.pkl)
+    |--main.py
+    |--evaluate.py
+    |--results
+        |--all the results (.pkl)
+    
+```
+
 Then for executing the model type the following command in terminal:
 
 ```
