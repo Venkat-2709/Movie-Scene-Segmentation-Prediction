@@ -7,10 +7,10 @@ import torch
 
 from tensorflow.keras.layers import Dense
 from sklearn.preprocessing import LabelEncoder
-
 from sklearn.decomposition import PCA
 
 
+# Class for data preparations.
 class Data:
     def __init__(self, movies):
         self.movies = movies
@@ -79,6 +79,7 @@ for file in data_files:
         data = pickle.load(f)
         movie_data.append(Data(data))
 
+# Reads data if file is already exists.
 if os.path.isfile('PlaceData'):
     data = open('PlaceData', 'rb')
     place_data = pickle.load(data)
@@ -90,6 +91,7 @@ if os.path.isfile('PlaceData'):
     audio_data = pickle.load(data)
     data.close()
 
+# Prepares the data. 
 else:
     place_data = []
     cast_data = []
@@ -116,6 +118,7 @@ else:
     pickle.dump(audio_data, data)
     data.close()
 
+# Reads the ground truth and already predicted probabilities.
 scene_transition = []
 ground_truth = []
 for movie in movie_data:
@@ -125,28 +128,41 @@ for movie in movie_data:
 scene_transition_data = pd.concat(scene_transition)
 ground_truth_data = pd.concat(ground_truth)
 scene_transition_data = scene_transition_data.to_numpy()
+print('Reading the data.')
 
+# Feature reduction is done by PCA.
 pca = PCA(n_components=200)
 place_data = pca.fit_transform(place_data)
 cast_data = pca.fit_transform(cast_data)
 action_data = pca.fit_transform(action_data)
 audio_data = pca.fit_transform(audio_data)
+print('Feature Reduction is done.')
 
 dataset = (place_data, cast_data, action_data, audio_data, scene_transition_data)
 dataset_ = np.concatenate(dataset, axis=1)
+print('Dataset is Collected.')
 
+# Encoding the y value for training.
 encoder = LabelEncoder()
 ground_truth_data = encoder.fit_transform(ground_truth_data)
 
+# Model for training. 
 model = tf.keras.models.Sequential()
 model.add(Dense(input_dim=801, units=1024, activation='tanh'))
 model.add(Dense(512, activation='tanh'))
 model.add(Dense(1, activation='sigmoid'))
 
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-model.fit(dataset_, ground_truth_data, epochs=10, batch_size=128)
-y_pred = model.predict(dataset_)
 
+# Training the model for 10 Epochs with batch size of 128.
+print('Training the Model.')
+model.fit(dataset_, ground_truth_data, epochs=10, batch_size=128)
+
+# Predicting the results.
+y_pred = model.predict(dataset_)
+print('Predicting the results.')
+
+# Storing the results in results folder. 
 index = 0
 for movie in movie_data:
     index = movie.separate_results(y_pred, index)
@@ -155,3 +171,5 @@ for movie in movie_data:
     file = open('results/' + str(movies.get('imdb_id')) + '.pkl', 'wb')
     pickle.dump(movies, file)
     file.close()
+
+print('Model is Trained and Program is completed. Now run evaluate.py to see the model performance.')
