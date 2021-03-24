@@ -1,4 +1,4 @@
-# Eluv.io_ML_Challenge
+# Movie Scene Segmentation Prediction
 
 ## The model will the predict the scene segmentation. 
 
